@@ -1,0 +1,93 @@
+### 1. Ver Eventos Públicos (No requiere Token)
+GET http://localhost:8000/api/eventos
+Accept: application/json
+
+###
+
+### 2. Login como Organizador A (Dueño del Evento 1)
+# @name loginOrganizadorA
+POST http://localhost:8000/api/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "email": "orga@eventhub.com",
+    "password": "password"
+}
+
+### Guardar Token del Organizador A
+@tokenOrgaA = {{loginOrganizadorA.response.body.token}}
+
+###
+
+### 3. Ver Perfil del Organizador A
+GET http://localhost:8000/api/perfil
+Authorization: Bearer {{tokenOrgaA}}
+Accept: application/json
+
+###
+
+### 4. Editar Evento 1 (Éxito - Él es el dueño)
+PUT http://localhost:8000/api/eventos/1
+Authorization: Bearer {{tokenOrgaA}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "titulo": "Laravel Conf 2026 - Modificado",
+    "descripcion": "Descripción actualizada",
+    "cupo_maximo": 150
+}
+
+###
+
+### 5. Login como Organizador B (No es dueño del Evento 1)
+# @name loginOrganizadorB
+POST http://localhost:8000/api/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "email": "orgb@eventhub.com",
+    "password": "password"
+}
+
+### Guardar Token del Organizador B
+@tokenOrgaB = {{loginOrganizadorB.response.body.token}}
+
+###
+
+### 6. Intentar Editar Evento 1 con Organizador B (Dará ERROR 403 Forbidden por la Policy)
+PUT http://localhost:8000/api/eventos/1
+Authorization: Bearer {{tokenOrgaB}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "titulo": "Hackeo de evento",
+    "descripcion": "No debería dejarme cambiarlo",
+    "cupo_maximo": 999
+}
+
+###
+
+### 7. Login como Administrador
+# @name loginAdmin
+POST http://localhost:8000/api/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "email": "admin@eventhub.com",
+    "password": "password"
+}
+
+### Guardar Token del Administrador
+@tokenAdmin = {{loginAdmin.response.body.token}}
+
+###
+
+### 8. Ver Métricas como Administrador (Éxito por el Gate)
+GET http://localhost:8000/api/admin/metricas
+Authorization: Bearer {{tokenAdmin}}
+Accept: application/json
